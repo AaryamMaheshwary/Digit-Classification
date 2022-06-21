@@ -1,3 +1,8 @@
+// TODO: Look over function names
+// TODO: Look over order of functions
+// TODO: Comment functions, add docstrings
+// TODO: Add README
+
 function load_data(data) {
   w1 = math.matrix(data.w1);
   w2 = math.matrix(data.w2);
@@ -6,17 +11,15 @@ function load_data(data) {
 }
 
 function reset() {
+  ctx.globalAlpha = 1;
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "black";
-  ctx.lineWidth = 20;
-  ctx.lineCap = "round";
   update_prediction("--", "--");
 }
 
 function get_canvas_data() {
   let X = [];
-  let pixel_size = canvas.height / 28;
   for (let i = 0; i < 28; i++) {
     for (let j = 0; j < 28; j++) {
       let x = j * pixel_size + pixel_size / 2;
@@ -60,36 +63,31 @@ function classify() {
 
 function start_draw(event) {
   document.addEventListener("mousemove", draw);
-  update_coords(event);
 }
 
 function stop_draw() {
   document.removeEventListener("mousemove", draw);
 }
 
-function update_coords(event) {
-  coords.x = event.clientX - canvas.offsetLeft;
-  coords.y = event.clientY - canvas.offsetTop;
+function fill_pixel(x, y, alpha) {
+  ctx.globalAlpha = alpha;
+  ctx.fillRect(x, y, pixel_size, pixel_size);
 }
 
-function make_stroke() {
-  let pixel_size = canvas.height / 28;
-  let x = Math.floor(coords.x / pixel_size) * pixel_size;
-  let y = Math.floor(coords.y / pixel_size) * pixel_size;
-  ctx.fillRect(x, y, pixel_size, pixel_size);
-  ctx.globalAlpha = 0.75;
-  ctx.fillRect(x - pixel_size, y, pixel_size, pixel_size);
-  ctx.fillRect(x + pixel_size, y, pixel_size, pixel_size);
-  ctx.fillRect(x, y - pixel_size, pixel_size, pixel_size);
-  ctx.fillRect(x, y + pixel_size, pixel_size, pixel_size);
-  ctx.globalAlpha = 1;
+function make_stroke(x, y) {
+  x = Math.floor(x / pixel_size) * pixel_size;
+  y = Math.floor(y / pixel_size) * pixel_size;
+  fill_pixel(x, y, 1);
+  fill_pixel(x - pixel_size, y, 0.75);
+  fill_pixel(x + pixel_size, y, 0.75);
+  fill_pixel(x, y - pixel_size, 0.75);
+  fill_pixel(x, y + pixel_size, 0.75);
 }
 
 function draw(event) {
-  ctx.beginPath();
-  update_coords(event);
-  make_stroke();
-  ctx.closePath();
+  let x = event.clientX - canvas.offsetLeft;
+  let y = event.clientY - canvas.offsetTop;
+  make_stroke(x, y);
 }
 
 function update_prediction(pred, conf) {
@@ -107,10 +105,7 @@ fetch("model/model_params.json")
 // Setup the canvas
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var coords = {
-  x: 0,
-  y: 0,
-};
+const pixel_size = canvas.height / 28;
 reset();
 
 // Start listening for mouse clicks to draw on the canvas
