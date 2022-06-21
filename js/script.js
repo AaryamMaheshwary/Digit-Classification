@@ -1,21 +1,36 @@
-// TODO: Look over function names
-// TODO: Look over order of functions
-// TODO: Comment functions, add docstrings
-// TODO: Add README
-
-function load_data(data) {
-  w1 = math.matrix(data.w1);
-  w2 = math.matrix(data.w2);
-  b1 = math.matrix(data.b1);
-  b2 = math.matrix(data.b2);
-}
-
 function reset() {
   ctx.globalAlpha = 1;
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "black";
-  update_prediction("--", "--");
+  update_prediction_label("--", "--");
+}
+
+function update_prediction_label(pred, conf) {
+  document.getElementById("prediction").innerHTML = pred;
+  document.getElementById("confidence").innerHTML = conf;
+}
+
+function get_prediction(a2) {
+  let conf = 0, pred;
+  a2.forEach(function (value, index) {
+    if (value > conf) {
+      conf = value;
+      pred = index[0];
+    }
+  });
+  conf = Math.round(conf * 1000) / 10;
+  return { pred, conf };
+}
+
+function forward_prop(X) {
+  let z1 = math.add(math.multiply(w1, X), b1);
+  let a1 = z1.map(function (value) {
+    return math.max(value, 0);
+  });
+  let z2 = math.add(math.multiply(w2, a1), b2);
+  let a2 = math.divide(math.exp(z2), math.sum(math.exp(z2)));
+  return a2;
 }
 
 function get_canvas_data() {
@@ -32,41 +47,11 @@ function get_canvas_data() {
   return X;
 }
 
-function forward_prop(X) {
-  let z1 = math.add(math.multiply(w1, X), b1);
-  let a1 = z1.map(function (value) {
-    return math.max(value, 0);
-  });
-  let z2 = math.add(math.multiply(w2, a1), b2);
-  let a2 = math.divide(math.exp(z2), math.sum(math.exp(z2)));
-  return a2;
-}
-
-function get_prediction(a2) {
-  let conf = 0, pred;
-  a2.forEach(function (value, index) {
-    if (value > conf) {
-      conf = value;
-      pred = index[0];
-    }
-  });
-  conf = Math.round(conf * 1000) / 10;
-  return { pred, conf };
-}
-
 function classify() {
   let X = get_canvas_data();
   let a2 = forward_prop(X);
   let y = get_prediction(a2);
-  update_prediction(y.pred, y.conf);
-}
-
-function start_draw(event) {
-  document.addEventListener("mousemove", draw);
-}
-
-function stop_draw() {
-  document.removeEventListener("mousemove", draw);
+  update_prediction_label(y.pred, y.conf);
 }
 
 function fill_pixel(x, y, alpha) {
@@ -90,9 +75,19 @@ function draw(event) {
   make_stroke(x, y);
 }
 
-function update_prediction(pred, conf) {
-  document.getElementById("prediction").innerHTML = pred;
-  document.getElementById("confidence").innerHTML = conf;
+function start_draw() {
+  document.addEventListener("mousemove", draw);
+}
+
+function stop_draw() {
+  document.removeEventListener("mousemove", draw);
+}
+
+function load_data(data) {
+  w1 = math.matrix(data.w1);
+  w2 = math.matrix(data.w2);
+  b1 = math.matrix(data.b1);
+  b2 = math.matrix(data.b2);
 }
 
 // Load the model parameters
