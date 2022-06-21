@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import json
 
-# TODO: Test Stochastic Gradient Descent and Mini-Batch Gradient Descent
 
 def rand_init():
     """Initialize weights and biases to random values in range: [-0.5, 0.5)"""
