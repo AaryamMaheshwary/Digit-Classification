@@ -90,7 +90,6 @@ function draw(event) {
   update_coords(event);
   make_stroke();
   ctx.closePath();
-  classify()
 }
 
 function update_prediction(pred, conf) {
